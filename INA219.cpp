@@ -69,23 +69,22 @@ const uint8_t MODE1	= 0;
 INA219::INA219(t_i2caddr addr): i2c_address(addr) {
 }
 
-bool INA219::begin() {
+uint8_t INA219::begin() {
+  uint8_t ret;
     Wire.begin();
-    if (!reset())
-    {
-      Serial.println("INA219 initialization failed.");
-      return false;
-    }
+    ret = reset();
+    if (ret)
+      return ret;  // Likely failed to address/find the device
     configure();
     calibrate();
 
-    return true;
+    return ret;
 }
 
 void INA219::calibrate(float shunt_val, float v_shunt_max, float v_bus_max, float i_max_expected) {
     uint16_t digits;
     float min_lsb, swap;
-#if (INA219_DEBUG == 1)
+#ifdef INA219_DEBUG
     float max_current,max_before_overflow,max_shunt_v,max_shunt_v_before_overflow,max_power,i_max_possible,max_lsb;
 #endif
 
@@ -116,7 +115,7 @@ void INA219::calibrate(float shunt_val, float v_shunt_max, float v_bus_max, floa
     cal = (uint16_t)swap;
     power_lsb = current_lsb * 20;
 
-#if (INA219_DEBUG == 1)
+#ifdef INA219_DEBUG
       i_max_possible = v_shunt_max / r_shunt;
       max_lsb = i_max_expected / 4096;
       max_current = current_lsb*32767;
@@ -149,23 +148,21 @@ void INA219::configure(  t_range range,  t_gain gain,  t_adc  bus_adc,  t_adc sh
   config = 0;
 
   config |= (range << BRNG | gain << PG_0 | bus_adc << BADC1 | shunt_adc << SADC1 | mode);
-#if (INA219_DEBUG == 1)
+#ifdef INA219_DEBUG
   Serial.print("Config: 0x"); Serial.println(config,HEX);
 #endif
   write16(CONFIG_R, config);
 }
 
 #define INA_RESET        0xFFFF    // send to CONFIG_R to reset unit
-//RMW Returns false if unable to reset (likely due to device not being functional/installed)
-bool INA219::reset(){
+// Returns non-zero if unable to reset.
+// This is likely due to device not being functional/installed on I2C bus
+// Returned error values are defined in the Wire libraries.
+// Values of 2 indicates the address wasn't on the bus (NAK response)
+uint8_t INA219::reset(){
   uint8_t ret = write16(CONFIG_R, INA_RESET);
-  if (ret) {
-    Serial.print("INA219::reset: write16 error: ");
-    Serial.println(ret);
-    return false;
-  }
-//RMW  _delay_ms(5);
-  return true;
+  _delay_ms(5);
+  return ret;
 }
 
 int16_t INA219::shuntVoltageRaw() const {
@@ -211,7 +208,7 @@ float INA219::busPower() const {
 */
 /**************************************************************************/
 void INA219::reconfig() const {
-#if (INA219_DEBUG == 1)
+#ifdef INA219_DEBUG
   Serial.print("Reconfigure with Config: 0x"); Serial.println(config,HEX);
 #endif
   write16(CONFIG_R, config);
@@ -223,7 +220,7 @@ void INA219::reconfig() const {
 */
 /**************************************************************************/
 void INA219::recalibrate() const {
-#if (INA219_DEBUG == 1)
+#ifdef INA219_DEBUG
   Serial.print("Recalibrate with cal: "); Serial.println(cal);
 #endif
   write16(CAL_R, cal);
@@ -276,6 +273,7 @@ bool INA219::overflow() const {
 *             INTERNAL I2C FUNCTIONS                  *
 **********************************************************************/
 
+// write16 returns a non-zero value in the case of a transmission error.
 uint8_t INA219::write16(t_reg a, uint16_t d) const {
   uint8_t temp;
   temp = (uint8_t)d;
@@ -292,8 +290,9 @@ uint8_t INA219::write16(t_reg a, uint16_t d) const {
     Wire.send(temp); // write data lobyte;
   #endif
 
-  return Wire.endTransmission(); // end transmission
-//RMW removing delay  delay(1);
+  temp = Wire.endTransmission(); // end transmission
+  _delay_ms(1);
+  return temp;
 }
 
 int16_t INA219::read16(t_reg a) const {

@@ -46,8 +46,8 @@
 
 #include <Wire.h>
 
-#define INA219_DEBUG 0
-
+// Uncomment to add some debug output
+//#define INA219_DEBUG
 
 // default values
 
@@ -129,8 +129,8 @@ class INA219
     		);
 
     /// Start i2 communication with actual device.
-    //RMW returns false on failure to reset.
-    bool begin( );
+    // Returns non-zero on failure to reset.
+    uint8_t begin( );
 
     /// calibration of equations and device.
     /// default values are for a 0.25 Ohm shunt on a 5V bus with max current of 1A
@@ -149,8 +149,8 @@ class INA219
     		        );
 
     /// Resets the INA219.
-    //RMW returns false on failure to reset.
-    bool reset();
+    // Returns non-zero on failure to reset.
+    uint8_t reset();
 
     /// Returns the raw binary value of the shunt voltage
     int16_t shuntVoltageRaw() const;
