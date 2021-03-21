@@ -129,7 +129,8 @@ class INA219
     		);
 
     /// Start i2 communication with actual device.
-    void begin( );
+    //RMW returns false on failure to reset.
+    bool begin( );
 
     /// calibration of equations and device.
     /// default values are for a 0.25 Ohm shunt on a 5V bus with max current of 1A
@@ -148,7 +149,8 @@ class INA219
     		        );
 
     /// Resets the INA219.
-    void reset();
+    //RMW returns false on failure to reset.
+    bool reset();
 
     /// Returns the raw binary value of the shunt voltage
     int16_t shuntVoltageRaw() const;
@@ -205,7 +207,8 @@ class INA219
 
     /// Writes a 16-bit word (d) to register pointer (a).
     /// When selecting a register pointer to read from, (d) = 0
-    void write16( t_reg addr,   ///< Register address.
+    // RMW: Returns non-zero in the case of an errant write.
+    uint8_t write16( t_reg addr,   ///< Register address.
     		      uint16_t data ///< Data to be writen.
     		     ) const;
 
