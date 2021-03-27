@@ -1,12 +1,36 @@
 {
-  "name": "INA219",
-  "keywords": "i2c, driver, sensor, battery, monitor, current, voltage",
+  "name": "ArduinoINA219",
+  "version": "1.1.1",
   "description": "TI INA219 hi-side i2c current/power monitor Library",
+  "keywords": "sensors, i2c, driver, sensor, battery, monitor, current, voltage",
   "repository":
   {
     "type": "git",
-    "url": "https://github.com/johngineer/ArduinoINA219"
+    "url": "https://github.com/flav1972/ArduinoINA219"
   },
-  "frameworks": "arduino",
-  "platforms": "atmelavr"
+  "authors":
+  [
+    {
+      "name": "DeCristofaro John",
+      "email": "johngineer@yahoo.com"
+    },
+    {
+      "name": "Jukka-Pekka Sarjanen",
+      "email": "jukka-Pekka.sarjanen@kone.com"
+    },
+    {         
+      "name": "gandy92",
+      "email": "gandy92@googlemail.com"
+    },
+    {
+      "name": "Flavius Bindea",
+      "email": "flav@flav.com",
+      "maintainer": true
+    },
+    {
+      "name": "Robert Wolff",
+      "email": "bob.wolff68@gmail.com"
+    }
+  ],
+  "frameworks": "arduino"
 }

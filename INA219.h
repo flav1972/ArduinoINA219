@@ -46,8 +46,8 @@
 
 #include <Wire.h>
 
-#define INA219_DEBUG 0
-
+// Uncomment to add some debug output
+//#define INA219_DEBUG
 
 // default values
 
@@ -129,7 +129,8 @@ class INA219
     		);
 
     /// Start i2 communication with actual device.
-    void begin( );
+    // Returns non-zero on failure to reset.
+    uint8_t begin( );
 
     /// calibration of equations and device.
     /// default values are for a 0.25 Ohm shunt on a 5V bus with max current of 1A
@@ -148,13 +149,14 @@ class INA219
     		        );
 
     /// Resets the INA219.
-    void reset();
+    // Returns non-zero on failure to reset.
+    uint8_t reset();
 
     /// Returns the raw binary value of the shunt voltage
     int16_t shuntVoltageRaw() const;
 
     /// Returns raw bus voltage binary value.
-    int16_t busVoltageRaw();
+    uint16_t busVoltageRaw();
 
     /// Returns raw current binary value.    
     int16_t shuntCurrentRaw() const;
@@ -198,7 +200,6 @@ class INA219
     float r_shunt, current_lsb, power_lsb;
     uint16_t config, cal;
     bool _ready, _overflow;
-    uint16_t _bus_voltage_register;
 
     ///Read 16 word from given register address.
     int16_t read16( t_reg addr ///< Register address.
@@ -206,7 +207,8 @@ class INA219
 
     /// Writes a 16-bit word (d) to register pointer (a).
     /// When selecting a register pointer to read from, (d) = 0
-    void write16( t_reg addr,   ///< Register address.
+    // RMW: Returns non-zero in the case of an errant write.
+    uint8_t write16( t_reg addr,   ///< Register address.
     		      uint16_t data ///< Data to be writen.
     		      bool stop = true // false if the i2c bus should not be released.
     		     ) const;
